@@ -18,6 +18,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import USER.Login;
+import USER.Verification;
+
 public class HospitalRegister extends AppCompatActivity {
 
     EditText email,password,confirmpassword;
@@ -79,11 +82,11 @@ public class HospitalRegister extends AppCompatActivity {
                         FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
                         UserProfileChangeRequest profileChangeRequest=new UserProfileChangeRequest.Builder().setDisplayName(p).build();
                         user.updateProfile(profileChangeRequest);
-                        Intent intent=new Intent(getApplicationContext(), HospitalVerification.class);
+                        Intent intent=new Intent(getApplicationContext(), HOSPITALDETAILS.class);
                         intent.putExtra("gmail",gmail);
                         intent.putExtra("password",pass);
                         startActivity(intent);
-
+                        finish();
 
 
 

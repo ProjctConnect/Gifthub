@@ -1,64 +1,104 @@
 package HOSPITAL;
 
-import android.net.Uri;
-import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.TextView;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
 import com.example.covidcare.R;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Picasso;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+
+import USER.Login;
+import USER.Verification;
 
 public class HospitalShowProfile extends AppCompatActivity {
-    TextView username,usernumber,useraddress,usermail;
-    ImageView profile;
-    StorageReference storageReference;
-    DocumentReference documentReference;
-    String gmailid;
+
+    EditText email,password,confirmpassword;
+    Button register,login;
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_hospital_show_profile);
-        username=findViewById(R.id.hname);
-        usernumber=findViewById(R.id.hnumber);
-        useraddress=findViewById(R.id.haddress);
-        usermail=findViewById(R.id.hmail);
-        profile=findViewById(R.id.hprofile);
-        gmailid=getIntent().getStringExtra("gmail");
-        documentReference= FirebaseFirestore.getInstance().collection("hospital").document(gmailid);
+        setContentView(R.layout.activity_hospital_register);
+        email=findViewById(R.id.googlemail1);
+        password=findViewById(R.id.pass1);
+        confirmpassword=findViewById(R.id.confpass1);
+        register=findViewById(R.id.regi1);
+        login=findViewById(R.id.logi1);
+        firebaseAuth=FirebaseAuth.getInstance();
 
-        storageReference =FirebaseStorage.getInstance().getReference().child(gmailid+"/hospitalprofile.jpg");
-        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        login.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSuccess(Uri uri) {
-                Picasso.get().load(uri).into(profile);
+            public void onClick(View v) {
+                Intent i=new Intent(getApplicationContext(), HospitalLogin.class);
+                startActivity(i);
+                finish();
             }
         });
 
-        documentReference=FirebaseFirestore.getInstance().collection("hospital").document(gmailid);
-        documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                String name=documentSnapshot.getString("name");
-                String number=documentSnapshot.getString("phone");
-                String address=documentSnapshot.getString("address");
-                String mail=documentSnapshot.getString("email");
-                username.setText(name);
-                usernumber.setText(number);
-                useraddress.setText(address);
-                usermail.setText(mail);
 
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String gmail=email.getText().toString().trim();
+                String pass=password.getText().toString().trim();
+                String confirm=confirmpassword.getText().toString().trim();
+
+
+                if (gmail.isEmpty()){
+                    email.setError("Enter your E-Mail ID");
+                    return;
+                }
+                if (pass.isEmpty()){
+                    password.setError("Enter your Password");
+                    return;
+                }
+                if (confirm.isEmpty()){
+                    confirmpassword.setError("Enter your Confirm Password");
+                    return;
+                }
+                if (!pass.equals(confirm)){
+                    confirmpassword.setError("Password mismatch");
+                    return;
+                }
+
+
+
+                firebaseAuth.createUserWithEmailAndPassword(gmail,pass).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        String p="Hospital";
+                        FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();
+                        UserProfileChangeRequest profileChangeRequest=new UserProfileChangeRequest.Builder().setDisplayName(p).build();
+                        user.updateProfile(profileChangeRequest);
+                        Intent intent=new Intent(getApplicationContext(), HOSPITALDETAILS.class);
+                        intent.putExtra("gmail",gmail);
+                        intent.putExtra("password",pass);
+                        startActivity(intent);
+                        finish();
+
+
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+                });
             }
         });
     }
-
-
 }

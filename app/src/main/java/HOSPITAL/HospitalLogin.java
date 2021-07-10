@@ -20,6 +20,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import USER.NavigationActivity;
+import USER.Registration;
 
 public class HospitalLogin extends AppCompatActivity {
     Button createacc,login;
@@ -82,9 +88,9 @@ public class HospitalLogin extends AppCompatActivity {
                             }
 
                         }else{
-                            Intent intent=new Intent(getApplicationContext(),HospitalVerification.class);
+                            Intent intent=new Intent(getApplicationContext(),HOSPITALDETAILS.class);
                             intent.putExtra("gmail",gmail);
-                            intent.putExtra("pass",password1);
+                            intent.putExtra("password",password1);
                             startActivity(intent);
                             finish();
                             Toast.makeText(getApplicationContext(), "verification link has been sent", Toast.LENGTH_SHORT).show();

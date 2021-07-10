@@ -1,5 +1,8 @@
 package HOSPITAL;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -8,20 +11,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.covidcare.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import USER.Profile;
+
 public class HospitalVerification extends AppCompatActivity {
     TextView verify,confirmation,sent;
     Button vbtn;
-    String mailgid,pass;
+    String mailgid,pass,hospitalname,city,address;
     RelativeLayout relativeLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +36,12 @@ public class HospitalVerification extends AppCompatActivity {
         relativeLayout=findViewById(R.id.relative1);
         sent=findViewById(R.id.sent1);
         vbtn = findViewById(R.id.verifybtn1);
-        FirebaseAuth fire = FirebaseAuth.getInstance();
-        mailgid =getIntent().getStringExtra("gmail");
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        mailgid =getIntent().getStringExtra("Email");
         pass  = getIntent().getStringExtra("password");
-        Toast.makeText(this, mailgid, Toast.LENGTH_SHORT).show();
-        Toast.makeText(this, pass, Toast.LENGTH_SHORT).show();
-
+        hospitalname=getIntent().getStringExtra("keyname2");
+        city=getIntent().getStringExtra("keyname");
+        address=getIntent().getStringExtra("address");
 
 
         relativeLayout.setVisibility(View.INVISIBLE);
@@ -49,14 +53,19 @@ public class HospitalVerification extends AppCompatActivity {
             vbtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    fire.signInWithEmailAndPassword(mailgid,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    firebaseAuth.signInWithEmailAndPassword(mailgid,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
                                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                                 if(user.isEmailVerified()){
-                                    Intent intent1 = new Intent(getApplicationContext(), HospitalNavigationActivity.class);
+                                    Intent intent1 = new Intent(getApplicationContext(), DATABEDS.class);
+                                    intent1.putExtra("Email",mailgid);
+                                    intent1.putExtra("keyname2",hospitalname);
+                                    intent1.putExtra("keyname",city);
+                                    intent1.putExtra("address",address);
                                     startActivity(intent1);
+                                    finish();
                                 }else{
                                     user.sendEmailVerification();
                                     vbtn.setText("CONTINUE");
